@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>15-Minute Shanghai | Healthy Lifestyle & Sport</title>
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div id="map" aria-label="Shanghai H3 accessibility map"></div>
+
+    <aside class="control-panel" aria-label="Map controls">
+      <header class="brand-block">
+        <div>
+          <p class="eyebrow">Track A</p>
+          <h1>15-Minute Shanghai</h1>
+          <p>Healthy Lifestyle &amp; Sport</p>
+        </div>
+        <div class="score-chip" id="mean-score">--</div>
+      </header>
+
+      <section class="control-section">
+        <div class="section-label">Layer</div>
+        <div class="segmented" id="metric-controls">
+          <button class="active" data-metric="composite">Composite</button>
+          <button data-metric="baseline">Baseline</button>
+          <button data-metric="health">Track A</button>
+        </div>
+      </section>
+
+      <section class="control-section">
+        <div class="section-label">Mode</div>
+        <div class="segmented grid-4" id="mode-controls">
+          <button class="active" data-mode="walk">Walk</button>
+          <button data-mode="bike">Bike</button>
+          <button data-mode="transit">Transit</button>
+          <button data-mode="car">Car</button>
+        </div>
+      </section>
+
+      <section class="control-section compact-stats">
+        <div>
+          <span id="hex-count">--</span>
+          <label>H3 cells</label>
+        </div>
+        <div>
+          <span id="grid-count">--</span>
+          <label>500 m cells</label>
+        </div>
+        <div>
+          <span id="active-field">Composite walk</span>
+          <label>active score</label>
+        </div>
+      </section>
+
+      <details class="transparency" open>
+        <summary>Data Transparency</summary>
+        <dl id="data-panel"></dl>
+      </details>
+    </aside>
+
+    <aside class="detail-panel" aria-label="Selected H3 details">
+      <div class="detail-header">
+        <p class="eyebrow" id="detail-district">Shanghai</p>
+        <h2 id="detail-title">Loading data</h2>
+      </div>
+      <div class="score-stack" id="score-stack"></div>
+      <dl class="detail-list" id="detail-list"></dl>
+    </aside>
+
+    <section class="recommender" aria-label="Where to live recommender">
+      <div class="recommender-head">
+        <div>
+          <p class="eyebrow">Where To Live</p>
+          <h2>Priority sliders</h2>
+        </div>
+        <button id="reset-weights" type="button" title="Reset priorities">Reset</button>
+      </div>
+      <div class="sliders" id="sliders"></div>
+      <ol id="top-list" class="top-list"></ol>
+    </section>
+
+    <div class="legend" aria-label="Score legend">
+      <span>Low</span>
+      <i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i><i class="c5"></i>
+      <span>High</span>
+    </div>
+
+    <div id="loading" class="loading">Loading H3 accessibility layer</div>
+
+    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+    <script src="https://unpkg.com/h3-js@4.2.1/dist/h3-js.umd.js"></script>
+    <script src="https://unpkg.com/deck.gl@9.1.12/dist.min.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>

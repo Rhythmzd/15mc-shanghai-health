@@ -1,0 +1,97 @@
+{
+  "project": "15-Minute Shanghai - Track A Healthy Lifestyle & Sport",
+  "generated_at": "2026-06-10T17:55:40.036985+08:00",
+  "grid_size_m": 500,
+  "h3_resolution": 8,
+  "grid_cells": 18653,
+  "h3_cells": 8664,
+  "score_range": {
+    "min": 2.45,
+    "mean": 74.51,
+    "max": 97.54
+  },
+  "paths": {
+    "city_boundary": "D:\\vscode\\CODEX\\Workspace\\15mc-shanghai-health\\data\\raw\\admin\\03-行政区\\2024\\上海市_市界.shp",
+    "district_boundary": "D:\\vscode\\CODEX\\Workspace\\15mc-shanghai-health\\data\\raw\\admin\\03-行政区\\2024\\上海市_县界.shp",
+    "built_area_2020": "D:\\vscode\\CODEX\\Workspace\\15mc-shanghai-health\\data\\raw\\built_area\\11-建成区\\上海市_建成区2020.shp",
+    "bus_stops": "D:\\vscode\\CODEX\\Workspace\\15mc-shanghai-health\\data\\raw\\traffic\\04-交通数据\\公交车站\\上海_公交站点.shp",
+    "metro_stations": "D:\\vscode\\CODEX\\Workspace\\15mc-shanghai-health\\data\\raw\\traffic\\04-交通数据\\地铁数据\\上海市_地铁站.shp",
+    "metro_exits": "D:\\vscode\\CODEX\\Workspace\\15mc-shanghai-health\\data\\raw\\traffic\\04-交通数据\\地铁数据\\上海市_地铁出入口.shp",
+    "aoi": "D:\\vscode\\CODEX\\Workspace\\15mc-shanghai-health\\data\\raw\\aoi\\08-AOI\\AOI-baiduapi\\SHP\\上海市_AOI面.shp",
+    "landuse_webmap": "D:\\vscode\\CODEX\\Workspace\\15mc-shanghai-health\\data\\raw\\aoi\\08-AOI\\landuse-webmap\\上海市_Landuse.shp",
+    "roads": "D:\\vscode\\CODEX\\Workspace\\15mc-shanghai-health\\data\\raw\\roads\\shanghai-roads-simplified.parquet"
+  },
+  "poi": {
+    "poi_dir": "D:/21570/wechat_files/xwechat_files/wxid_58oway7w5m2s12_81f1/msg/file/2026-06/Shp",
+    "poi_files_used": [
+      "上海市_交通设施服务_WGS84.shp",
+      "上海市_体育休闲服务_WGS84.shp",
+      "上海市_公共设施_WGS84.shp",
+      "上海市_医疗保健服务_WGS84.shp",
+      "上海市_政府机构及社会团体_WGS84.shp",
+      "上海市_生活服务_WGS84.shp",
+      "上海市_科教文化服务_WGS84.shp",
+      "上海市_购物服务_WGS84.shp",
+      "上海市_风景名胜_WGS84.shp",
+      "上海市_餐饮服务_WGS84.shp"
+    ],
+    "poi_rows_loaded": 744184,
+    "poi_status": "loaded"
+  },
+  "supporting_data": {
+    "supporting_layers": [
+      {
+        "layer": "bus_stops",
+        "rows": 37954
+      },
+      {
+        "layer": "metro_stations",
+        "rows": 501
+      },
+      {
+        "layer": "metro_exits",
+        "rows": 1770
+      },
+      {
+        "layer": "baidu_aoi",
+        "rows": 25680
+      },
+      {
+        "layer": "landuse_parks",
+        "rows": 5440
+      },
+      {
+        "layer": "ai_green_space",
+        "rows": 24900
+      }
+    ],
+    "roads_summary": {
+      "rows": 156432,
+      "total_km": 34056.3,
+      "bike_suitable_km": 26620.9,
+      "major_road_km": 16174.3
+    }
+  },
+  "group_counts": {
+    "civic": 75595,
+    "cycling_env": 101470,
+    "education": 44690,
+    "food": 488300,
+    "green_outdoor": 69084,
+    "healthcare": 23703,
+    "healthy_food": 123686,
+    "housing_price": 4961,
+    "major_roads": 48629,
+    "metro": 501,
+    "open_space": 69084,
+    "sport": 30540,
+    "transit_access": 126290
+  },
+  "method_notes": [
+    "500 m cells are generated inside the 2020 built-up area mask.",
+    "15-minute access is modelled with mode-specific Euclidean catchments: walk 1.2 km, bike 3.5 km, transit 2.5 km, car 5 km.",
+    "Road-network data are used for cycling environment and major-road environmental penalty; full Dijkstra is left as a notebook extension because no complete travel-time network is supplied for all modes.",
+    "AOI price is used only as a housing/rent-band proxy for the web detail panel."
+  ],
+  "runtime_seconds": 67.1
+}

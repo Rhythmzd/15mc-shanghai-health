@@ -1,0 +1,47 @@
+# Secrets
+.env
+.env.*
+*.key
+*.pem
+
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+.deps/
+
+# Data
+data/raw/*
+data/cache/*
+*.gpkg
+*.shp
+*.dbf
+*.shx
+*.prj
+*.cpg
+*.osm
+*.pbf
+*.sqlite
+*.duckdb
+
+# Keep directory placeholders
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/output/.gitkeep
+
+# Web
+node_modules/
+dist/
+.vercel/
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+server.log
+server.err.log
