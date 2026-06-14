@@ -97,6 +97,7 @@ from scripts.build_outputs import (
     load_env,
     locate_paths,
 )
+from scripts.poi_2024 import load_poi_2024_points
 
 load_env()
 paths = locate_paths()
@@ -115,6 +116,7 @@ source_log = pd.DataFrame([
     {"family": "Administrative", "dataset": "2024 Shanghai city/district boundaries", "use": "city mask, district labels"},
     {"family": "Built area", "dataset": "2020 built-up area", "use": "limit 500 m grid to urbanized land"},
     {"family": "POI", "dataset": "Gaode WGS84 POI shapefiles", "use": "food, health, education, sport, civic, transit proxy"},
+    {"family": "POI", "dataset": "POI 2024 classified CSVs", "use": "preferred Shanghai POI source for Track A sport, food, scenic, transit, and baseline education/health"},
     {"family": "Traffic", "dataset": "bus stops, metro stations, metro exits", "use": "public transport access"},
     {"family": "AOI", "dataset": "Baidu AOI polygons", "use": "supplement amenities, parks, housing-price proxy"},
     {"family": "Green space", "dataset": "AI interpreted green-space polygons", "use": "green/outdoor and environmental quality"},
@@ -187,6 +189,31 @@ districts[[district_name_col, "面积", "人口"]].head(10)
 poi_dir = Path(os.environ.get("SHANGHAI_POI_SHP_DIR", ""))
 print("POI directory:", poi_dir)
 print("Exists:", poi_dir.exists())
+"""
+            ),
+            code(
+                r"""
+poi_2024_groups, poi_2024_meta = load_poi_2024_points(RAW, PROJECT_CRS)
+poi_2024_meta
+"""
+            ),
+            code(
+                r"""
+pd.Series(poi_2024_meta.get("group_row_counts", {})).sort_values(ascending=False).to_frame("rows")
+"""
+            ),
+            code(
+                r"""
+sport = poi_2024_groups["sport"][0] if poi_2024_groups["sport"] else None
+healthy_food = poi_2024_groups["healthy_food"][0] if poi_2024_groups["healthy_food"] else None
+education = poi_2024_groups["education"][0] if poi_2024_groups["education"] else None
+
+if sport is not None:
+    display(sport[[c for c in ["name", "bigType", "midType", "smallType", "typecode", "adname"] if c in sport.columns]].head(8))
+if healthy_food is not None:
+    display(healthy_food[[c for c in ["name", "bigType", "midType", "smallType", "typecode", "adname"] if c in healthy_food.columns]].head(8))
+if education is not None:
+    display(education[[c for c in ["name", "bigType", "midType", "smallType", "typecode", "adname"] if c in education.columns]].head(8))
 """
             ),
             code(
@@ -328,10 +355,11 @@ display(mode_radii)
                 r"""
 validation_checks = pd.DataFrame([
     {"check": "All core shapefiles exist", "status": all(path.exists() for path in paths.values())},
-    {"check": "POI directory exists", "status": poi_dir.exists()},
+    {"check": "POI 2024 classified CSVs loaded", "status": poi_2024_meta.get("poi_status") == "loaded"},
+    {"check": "Legacy POI directory exists", "status": poi_dir.exists()},
     {"check": "2024 district layer has 16 districts", "status": len(districts) == 16},
     {"check": "Road parquet has geometry", "status": "geometry" in roads.columns},
-    {"check": "Selected POI rows are available", "status": int(poi_inventory[poi_inventory["major_category"].isin(selected_poi)]["features"].sum()) > 100000},
+    {"check": "POI 2024 sport rows available", "status": int(poi_2024_meta.get("group_row_counts", {}).get("sport", 0)) > 10000},
 ])
 validation_checks
 """
@@ -343,6 +371,7 @@ source_inventory = pd.concat(
     [
         inventory_df.assign(source_family="project_raw_layers"),
         poi_inventory.rename(columns={"file": "path", "major_category": "label"}).assign(source_family="gaode_poi"),
+        pd.DataFrame(poi_2024_meta.get("files_used", [])).assign(label="POI 2024 classified CSVs", geometry_type="table", source_family="poi_2024"),
         green_inventory.rename(columns={"file": "path"}).assign(label="ai_green_space", source_family="ai_interpreted"),
     ],
     ignore_index=True,
@@ -557,8 +586,14 @@ groups = merge_groups(poi_groups, support_groups)
 
 group_counts = pd.Series({k: len(v) for k, v in groups.items()}).sort_values(ascending=False)
 print("POI status:", poi_meta["poi_status"])
+print("POI source:", poi_meta.get("poi_source", "unknown"))
 print("POI rows loaded:", f"{poi_meta['poi_rows_loaded']:,}")
 group_counts.to_frame("features")
+"""
+            ),
+            code(
+                r"""
+pd.Series(poi_meta.get("group_row_counts", {})).sort_values(ascending=False).to_frame("poi_rows")
 """
             ),
             code(

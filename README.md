@@ -33,6 +33,7 @@ Track A indicators:
 - `notebooks/02_grid_isochrones.ipynb`: 2020 built-up-area 500 m grid, four-mode 15-minute accessibility, spatial joins, and cached grid output.
 - `notebooks/03_scoring_h3.ipynb`: baseline scoring, Track A scoring, H3 resolution 8 aggregation, and GeoJSON export.
 - `scripts/build_outputs.py`: reproducible raw-data-to-H3 pipeline used by the notebooks and web app.
+- `scripts/poi_2024.py`: chunked loader and category filter for the `POI 2024` Shanghai CSV package.
 - `app/`: static web application source code.
 - `docs/`: methodology, data source log, and Trello sprint plan.
 
@@ -42,6 +43,26 @@ Generated outputs:
 - `data/output/shanghai_health_h3_r8.geojson`: full H3 analysis layer, 8,664 H3 cells.
 - `app/data/shanghai_health_h3_r8.geojson`: lightweight web layer.
 - `data/output/summary.json`: run metadata, source counts, and limitations.
+
+## POI Sources
+
+The project now prefers the classified CSV package in:
+
+```text
+data/raw/POI 2024/csv格式/已分类
+```
+
+when it is available. This source is used to build the main amenity groups for:
+
+- sport and leisure
+- healthy food
+- scenic/open-space support
+- transit-supporting POIs
+- healthcare
+- education
+- civic/public services
+
+The old `SHANGHAI_POI_SHP_DIR` shapefile workflow remains as a fallback only.
 
 ## Run
 

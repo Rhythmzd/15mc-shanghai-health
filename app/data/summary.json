@@ -1,14 +1,14 @@
 {
   "project": "15-Minute Shanghai - Track A Healthy Lifestyle & Sport",
-  "generated_at": "2026-06-10T17:55:40.036985+08:00",
+  "generated_at": "2026-06-14T19:39:28.763316+08:00",
   "grid_size_m": 500,
   "h3_resolution": 8,
   "grid_cells": 18653,
   "h3_cells": 8664,
   "score_range": {
     "min": 2.45,
-    "mean": 74.51,
-    "max": 97.54
+    "mean": 67.94,
+    "max": 96.37
   },
   "paths": {
     "city_boundary": "D:\\vscode\\CODEX\\Workspace\\15mc-shanghai-health\\data\\raw\\admin\\03-行政区\\2024\\上海市_市界.shp",
@@ -22,21 +22,80 @@
     "roads": "D:\\vscode\\CODEX\\Workspace\\15mc-shanghai-health\\data\\raw\\roads\\shanghai-roads-simplified.parquet"
   },
   "poi": {
-    "poi_dir": "D:/21570/wechat_files/xwechat_files/wxid_58oway7w5m2s12_81f1/msg/file/2026-06/Shp",
-    "poi_files_used": [
-      "上海市_交通设施服务_WGS84.shp",
-      "上海市_体育休闲服务_WGS84.shp",
-      "上海市_公共设施_WGS84.shp",
-      "上海市_医疗保健服务_WGS84.shp",
-      "上海市_政府机构及社会团体_WGS84.shp",
-      "上海市_生活服务_WGS84.shp",
-      "上海市_科教文化服务_WGS84.shp",
-      "上海市_购物服务_WGS84.shp",
-      "上海市_风景名胜_WGS84.shp",
-      "上海市_餐饮服务_WGS84.shp"
+    "poi_source": "POI 2024 classified CSVs",
+    "poi_dir": "D:\\vscode\\CODEX\\Workspace\\15mc-shanghai-health\\data\\raw\\POI 2024",
+    "poi_status": "loaded",
+    "poi_rows_loaded": 492481,
+    "files_used": [
+      {
+        "source_key": "food_shop",
+        "file": "上海市-1754933-utf8.csv-购物服务.csv",
+        "rows_loaded": 190281,
+        "rows_selected": 190272,
+        "healthy_food_rows": 92813
+      },
+      {
+        "source_key": "food_dining",
+        "file": "上海市-1754933-utf8.csv-餐饮服务.csv",
+        "rows_loaded": 136900,
+        "rows_selected": 136899
+      },
+      {
+        "source_key": "healthcare",
+        "file": "上海市-1754933-utf8.csv-医疗保健服务.csv",
+        "rows_loaded": 23354,
+        "rows_selected": 23354
+      },
+      {
+        "source_key": "education",
+        "file": "上海市-1754933-utf8.csv-科教文化服务.csv",
+        "rows_loaded": 19809,
+        "rows_selected": 7068
+      },
+      {
+        "source_key": "civic_gov",
+        "file": "上海市-1754933-utf8.csv-政府机构及社会团体.csv",
+        "rows_loaded": 54444,
+        "rows_selected": 54444
+      },
+      {
+        "source_key": "civic_public",
+        "file": "上海市-1754933-utf8.csv-公共设施.csv",
+        "rows_loaded": 19631,
+        "rows_selected": 19631
+      },
+      {
+        "source_key": "transit",
+        "file": "上海市-1754933-utf8.csv-交通设施服务.csv",
+        "rows_loaded": 84572,
+        "rows_selected": 19018
+      },
+      {
+        "source_key": "scenic",
+        "file": "上海市-1754933-utf8.csv-风景名胜.csv",
+        "rows_loaded": 9216,
+        "rows_selected": 9216
+      },
+      {
+        "source_key": "sport",
+        "file": "上海市-1754933-utf8.csv-体育休闲服务.csv",
+        "rows_loaded": 32580,
+        "rows_selected": 32579,
+        "sport_rows": 21651,
+        "park_like_rows": 5517
+      }
     ],
-    "poi_rows_loaded": 744184,
-    "poi_status": "loaded"
+    "group_row_counts": {
+      "food": 327171,
+      "healthcare": 23354,
+      "education": 7068,
+      "open_space": 14733,
+      "transit_access": 19018,
+      "civic": 74075,
+      "sport": 21651,
+      "green_outdoor": 14733,
+      "healthy_food": 92813
+    }
   },
   "supporting_data": {
     "supporting_layers": [
@@ -73,19 +132,19 @@
     }
   },
   "group_counts": {
-    "civic": 75595,
+    "civic": 79441,
     "cycling_env": 101470,
-    "education": 44690,
-    "food": 488300,
-    "green_outdoor": 69084,
-    "healthcare": 23703,
-    "healthy_food": 123686,
+    "education": 11882,
+    "food": 327753,
+    "green_outdoor": 46656,
+    "healthcare": 23922,
+    "healthy_food": 93355,
     "housing_price": 4961,
     "major_roads": 48629,
     "metro": 501,
-    "open_space": 69084,
-    "sport": 30540,
-    "transit_access": 126290
+    "open_space": 46656,
+    "sport": 21733,
+    "transit_access": 59243
   },
   "method_notes": [
     "500 m cells are generated inside the 2020 built-up area mask.",
@@ -93,5 +152,5 @@
     "Road-network data are used for cycling environment and major-road environmental penalty; full Dijkstra is left as a notebook extension because no complete travel-time network is supplied for all modes.",
     "AOI price is used only as a housing/rent-band proxy for the web detail panel."
   ],
-  "runtime_seconds": 67.1
+  "runtime_seconds": 57.2
 }

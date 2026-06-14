@@ -21,6 +21,8 @@ import pyogrio
 from scipy.spatial import cKDTree
 from shapely.geometry import Polygon, box
 
+from scripts.poi_2024 import load_poi_2024_points
+
 
 RAW = ROOT / "data" / "raw"
 PROCESSED = ROOT / "data" / "processed"
@@ -210,8 +212,20 @@ def keyword_mask(text: pd.Series, keywords: list[str]) -> pd.Series:
 
 
 def load_poi_points() -> tuple[dict[str, list[gpd.GeoDataFrame]], dict]:
+    poi_2024_groups, poi_2024_meta = load_poi_2024_points(RAW, PROJECT_CRS)
+    if poi_2024_meta.get("poi_status") == "loaded":
+        log(
+            "Loaded POI 2024 classified CSVs: "
+            + ", ".join(
+                f"{group}={count:,}"
+                for group, count in sorted((poi_2024_meta.get("group_row_counts") or {}).items())
+            )
+        )
+        return poi_2024_groups, poi_2024_meta
+
     poi_dir_value = os.environ.get("SHANGHAI_POI_SHP_DIR", "")
     meta = {
+        "poi_source": "legacy Gaode shapefiles",
         "poi_dir": poi_dir_value,
         "poi_files_used": [],
         "poi_rows_loaded": 0,

@@ -255,8 +255,10 @@ function renderDataPanel() {
   const layers = supporting.supporting_layers || [];
   const layerText = layers.map((layer) => `${layer.layer}: ${numberFmt.format(layer.rows)}`).join(", ");
   const generated = summary.generated_at ? new Date(summary.generated_at).toLocaleString() : "No data";
+  const poiSource = summary.poi?.poi_source || "Unknown";
   $("data-panel").innerHTML = `
     <dt>Generated</dt><dd>${escapeHtml(generated)}</dd>
+    <dt>POI source</dt><dd>${escapeHtml(poiSource)}</dd>
     <dt>POI rows</dt><dd>${numberFmt.format(summary.poi?.poi_rows_loaded || 0)}</dd>
     <dt>Traffic/green</dt><dd>${escapeHtml(layerText)}</dd>
     <dt>Roads</dt><dd>${numberFmt.format(roads.rows || 0)} edges, ${numberFmt.format(roads.total_km || 0)} km</dd>
