@@ -30,7 +30,7 @@ Track A indicators:
 ## Deliverables
 
 - `notebooks/01_data_collection.ipynb`: source inventory, validation, provenance, and 829-word literature review.
-- `notebooks/02_grid_isochrones.ipynb`: 2020 built-up-area 500 m grid, four-mode 15-minute accessibility, spatial joins, and cached grid output.
+- `notebooks/02_grid_isochrones.ipynb`: Shanghai administrative-boundary 500 m grid, four-mode 15-minute accessibility, spatial joins, and cached grid output.
 - `notebooks/03_scoring_h3.ipynb`: baseline scoring, Track A scoring, H3 resolution 8 aggregation, and GeoJSON export.
 - `scripts/build_outputs.py`: reproducible raw-data-to-H3 pipeline used by the notebooks and web app.
 - `scripts/poi_2024.py`: chunked loader and category filter for the `POI 2024` Shanghai CSV package.
@@ -39,8 +39,8 @@ Track A indicators:
 
 Generated outputs:
 
-- `data/processed/shanghai_500m_health_grid.parquet`: 18,653 grid cells.
-- `data/output/shanghai_health_h3_r8.geojson`: full H3 analysis layer, 8,664 H3 cells.
+- `data/processed/shanghai_500m_health_grid.parquet`: 33,619 citywide 500 m grid cells.
+- `data/output/shanghai_health_h3_r8.geojson`: full H3 analysis layer, 15,134 H3 cells at resolution 8.
 - `app/data/shanghai_health_h3_r8.geojson`: lightweight web layer.
 - `data/output/summary.json`: run metadata, source counts, and limitations.
 

@@ -1,13 +1,13 @@
 {
   "project": "15-Minute Shanghai - Track A Healthy Lifestyle & Sport",
-  "generated_at": "2026-06-14T19:39:28.763316+08:00",
+  "generated_at": "2026-06-16T15:55:12.639337+08:00",
   "grid_size_m": 500,
   "h3_resolution": 8,
-  "grid_cells": 18653,
-  "h3_cells": 8664,
+  "grid_cells": 33619,
+  "h3_cells": 15134,
   "score_range": {
-    "min": 2.45,
-    "mean": 67.94,
+    "min": 0.46,
+    "mean": 47.69,
     "max": 96.37
   },
   "paths": {
@@ -147,10 +147,11 @@
     "transit_access": 59243
   },
   "method_notes": [
-    "500 m cells are generated inside the 2020 built-up area mask.",
+    "500 m cells are generated inside the Shanghai administrative boundary so coastal districts, Changxing Island, and Chongming Island remain visible.",
+    "The 2020 built-up area layer is retained as a source reference, but it is not used to remove low-density island or coastal cells from the web map.",
     "15-minute access is modelled with mode-specific Euclidean catchments: walk 1.2 km, bike 3.5 km, transit 2.5 km, car 5 km.",
     "Road-network data are used for cycling environment and major-road environmental penalty; full Dijkstra is left as a notebook extension because no complete travel-time network is supplied for all modes.",
     "AOI price is used only as a housing/rent-band proxy for the web detail panel."
   ],
-  "runtime_seconds": 57.2
+  "runtime_seconds": 185.3
 }

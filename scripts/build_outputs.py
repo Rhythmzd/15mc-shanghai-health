@@ -166,7 +166,7 @@ def union_geometry(gdf: gpd.GeoDataFrame):
     return fixed.geometry.union_all()
 
 
-def create_500m_grid(mask: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+def create_500m_grid(mask: gpd.GeoDataFrame, label: str = "analysis area") -> gpd.GeoDataFrame:
     mask_union = union_geometry(mask)
     minx, miny, maxx, maxy = mask.total_bounds
     xs = np.arange(math.floor(minx / GRID_SIZE_M) * GRID_SIZE_M, maxx + GRID_SIZE_M, GRID_SIZE_M)
@@ -183,7 +183,7 @@ def create_500m_grid(mask: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     grid["cell_area_m2"] = grid.geometry.area
     grid["centroid_x"] = grid.geometry.centroid.x
     grid["centroid_y"] = grid.geometry.centroid.y
-    log(f"Created {len(grid):,} 500 m grid cells from 2020 built-up area mask.")
+    log(f"Created {len(grid):,} 500 m grid cells from {label}.")
     return grid
 
 
@@ -509,6 +509,16 @@ def add_districts(grid: gpd.GeoDataFrame, district_path: Path) -> gpd.GeoDataFra
     joined = gpd.sjoin(centroids, districts[[district_col, "geometry"]], how="left", predicate="within")
     district_by_grid = joined.groupby("grid_id")[district_col].first()
     grid["district"] = grid["grid_id"].map(district_by_grid).fillna("Unknown")
+    missing = grid["district"].eq("Unknown")
+    if missing.any():
+        fallback = gpd.sjoin(
+            grid.loc[missing, ["grid_id", "geometry"]].copy(),
+            districts[[district_col, "geometry"]],
+            how="left",
+            predicate="intersects",
+        )
+        fallback_by_grid = fallback.groupby("grid_id")[district_col].first()
+        grid.loc[missing, "district"] = grid.loc[missing, "grid_id"].map(fallback_by_grid).fillna("Unknown")
     return grid
 
 
@@ -710,11 +720,11 @@ def main() -> None:
         log(f"  {key}: {value.relative_to(ROOT) if value.is_relative_to(ROOT) else value}")
 
     city = read_file(paths["city_boundary"], crs=PROJECT_CRS)
-    built = read_file(paths["built_area_2020"], crs=PROJECT_CRS)
     city_union = union_geometry(city)
-    built["geometry"] = built.geometry.make_valid().intersection(city_union)
-    built = built[~built.geometry.is_empty].copy()
-    grid = create_500m_grid(built)
+    city_mask = city.copy()
+    city_mask["geometry"] = city_mask.geometry.make_valid()
+    city_mask = city_mask[~city_mask.geometry.is_empty].copy()
+    grid = create_500m_grid(city_mask, label="Shanghai administrative boundary")
     grid = add_districts(grid, paths["district_boundary"])
 
     poi_groups, poi_meta = load_poi_points()
@@ -745,7 +755,8 @@ def main() -> None:
         "supporting_data": support_meta,
         "group_counts": group_counts,
         "method_notes": [
-            "500 m cells are generated inside the 2020 built-up area mask.",
+            "500 m cells are generated inside the Shanghai administrative boundary so coastal districts, Changxing Island, and Chongming Island remain visible.",
+            "The 2020 built-up area layer is retained as a source reference, but it is not used to remove low-density island or coastal cells from the web map.",
             "15-minute access is modelled with mode-specific Euclidean catchments: walk 1.2 km, bike 3.5 km, transit 2.5 km, car 5 km.",
             "Road-network data are used for cycling environment and major-road environmental penalty; full Dijkstra is left as a notebook extension because no complete travel-time network is supplied for all modes.",
             "AOI price is used only as a housing/rent-band proxy for the web detail panel.",
