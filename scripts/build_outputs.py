@@ -176,7 +176,7 @@ def create_500m_grid(mask: gpd.GeoDataFrame, label: str = "analysis area") -> gp
     for ix, x in enumerate(xs[:-1]):
         for iy, y in enumerate(ys[:-1]):
             geom = box(x, y, x + GRID_SIZE_M, y + GRID_SIZE_M)
-            if geom.intersects(mask_union):
+            if geom.centroid.within(mask_union):
                 cells.append(geom)
                 ids.append(f"g{ix:04d}_{iy:04d}")
     grid = gpd.GeoDataFrame({"grid_id": ids}, geometry=cells, crs=mask.crs)
@@ -185,6 +185,44 @@ def create_500m_grid(mask: gpd.GeoDataFrame, label: str = "analysis area") -> gp
     grid["centroid_y"] = grid.geometry.centroid.y
     log(f"Created {len(grid):,} 500 m grid cells from {label}.")
     return grid
+
+
+def create_analysis_mask(paths: dict[str, Path], city: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    city_union = union_geometry(city)
+    mask_parts = []
+
+    built = read_file(paths["built_area_2020"], crs=PROJECT_CRS)
+    built["geometry"] = built.geometry.make_valid().intersection(city_union)
+    mask_parts.append(built[["geometry"]])
+
+    landuse = read_file(paths["landuse_webmap"], crs=PROJECT_CRS)
+    if "fclass" in landuse.columns:
+        water_classes = {"water", "reservoir", "river", "wetland", "dock", "basin"}
+        landuse = landuse[~landuse["fclass"].fillna("").astype(str).str.lower().isin(water_classes)].copy()
+    landuse["geometry"] = landuse.geometry.make_valid().intersection(city_union)
+    mask_parts.append(landuse[["geometry"]])
+
+    try:
+        aoi = read_file(paths["aoi"], crs=PROJECT_CRS, columns=[])
+        aoi["geometry"] = aoi.geometry.make_valid().intersection(city_union)
+        mask_parts.append(aoi[["geometry"]])
+    except Exception as exc:
+        log(f"Skipped AOI in analysis mask: {type(exc).__name__}: {exc}")
+
+    roads = gpd.read_parquet(paths["roads"])
+    if roads.crs is None:
+        roads = roads.set_crs(PROJECT_CRS, allow_override=True)
+    else:
+        roads = roads.to_crs(PROJECT_CRS)
+    road_mask = gpd.GeoDataFrame(geometry=roads.geometry.buffer(120), crs=PROJECT_CRS)
+    road_mask["geometry"] = road_mask.geometry.make_valid().intersection(city_union)
+    mask_parts.append(road_mask)
+
+    mask = pd.concat(mask_parts, ignore_index=True)
+    mask = gpd.GeoDataFrame(mask, geometry="geometry", crs=PROJECT_CRS)
+    mask = mask[mask.geometry.notna() & ~mask.geometry.is_empty].copy()
+    mask_union = mask.geometry.union_all().buffer(80).intersection(city_union)
+    return gpd.GeoDataFrame(geometry=[mask_union], crs=PROJECT_CRS)
 
 
 def point_from_polygons(gdf: gpd.GeoDataFrame, label: str) -> gpd.GeoDataFrame:
@@ -720,11 +758,8 @@ def main() -> None:
         log(f"  {key}: {value.relative_to(ROOT) if value.is_relative_to(ROOT) else value}")
 
     city = read_file(paths["city_boundary"], crs=PROJECT_CRS)
-    city_union = union_geometry(city)
-    city_mask = city.copy()
-    city_mask["geometry"] = city_mask.geometry.make_valid()
-    city_mask = city_mask[~city_mask.geometry.is_empty].copy()
-    grid = create_500m_grid(city_mask, label="Shanghai administrative boundary")
+    analysis_mask = create_analysis_mask(paths, city)
+    grid = create_500m_grid(analysis_mask, label="land and urban-activity mask")
     grid = add_districts(grid, paths["district_boundary"])
 
     poi_groups, poi_meta = load_poi_points()
@@ -755,8 +790,8 @@ def main() -> None:
         "supporting_data": support_meta,
         "group_counts": group_counts,
         "method_notes": [
-            "500 m cells are generated inside the Shanghai administrative boundary so coastal districts, Changxing Island, and Chongming Island remain visible.",
-            "The 2020 built-up area layer is retained as a source reference, but it is not used to remove low-density island or coastal cells from the web map.",
+            "500 m cells are generated from a land and urban-activity mask so coastal districts, Changxing Island, and Chongming Island remain visible while open sea is excluded.",
+            "The mask combines the 2020 built-up area, non-water land-use polygons, Baidu AOI polygons, and a small road-network buffer, clipped to the Shanghai administrative boundary.",
             "15-minute access is modelled with mode-specific Euclidean catchments: walk 1.2 km, bike 3.5 km, transit 2.5 km, car 5 km.",
             "Road-network data are used for cycling environment and major-road environmental penalty; full Dijkstra is left as a notebook extension because no complete travel-time network is supplied for all modes.",
             "AOI price is used only as a housing/rent-band proxy for the web detail panel.",

@@ -44,7 +44,7 @@ The Paris heterogeneity paper supplied for this project is especially relevant b
 
 For this Track A project, the baseline 15-minute city is defined as access to daily retail and food, primary healthcare, education or childcare, open space, public transport, and civic/community services. The health and sport track then asks whether a place supports a healthy lifestyle beyond minimum daily convenience. I operationalize that track with five components: sport facilities, green/outdoor access, cycling environment, healthy food access, and environmental quality. This follows the public-health logic that exercise is shaped by both formal facilities and informal environments. Gyms, courts, swimming pools, parks, green corridors, safe bikeable roads, and fresh-food retailers all contribute to the opportunity structure for healthy routines.
 
-The data strategy reflects these concepts. Gaode POI shapefiles provide rich point-level amenities for sport, food, healthcare, education, civic services, and transport-related facilities. The Baidu AOI layer adds polygonal places, including parks, residential compounds, and a housing-price proxy used only in the web detail panel. The 2024 administrative boundary layer defines the citywide analysis mask and district labels so coastal districts, Changxing Island, and Chongming Island remain visible. The 2020 built-up area layer is retained as a source reference rather than as the final web-map mask. Traffic shapefiles supply bus stops, metro stations, metro exits, and related transit features. AI-interpreted green-space shapefiles and land-use polygons strengthen the open-space and environmental components. Finally, the simplified Shanghai road parquet derived from OSM-style network extraction contributes cycling and major-road indicators.
+The data strategy reflects these concepts. Gaode POI shapefiles provide rich point-level amenities for sport, food, healthcare, education, civic services, and transport-related facilities. The Baidu AOI layer adds polygonal places, including parks, residential compounds, and a housing-price proxy used only in the web detail panel. The 2024 administrative boundary layer provides the outer city clip and district labels, while the analysis mask is built from land and urban-activity evidence so coastal districts, Changxing Island, and Chongming Island remain visible without filling open sea. The 2020 built-up area layer is retained as a source reference rather than as the final web-map mask. Traffic shapefiles supply bus stops, metro stations, metro exits, and related transit features. AI-interpreted green-space shapefiles and land-use polygons strengthen the open-space and environmental components. Finally, the simplified Shanghai road parquet derived from OSM-style network extraction contributes cycling and major-road indicators.
 
 The project uses a 500 m grid as the working analysis surface and H3 resolution 8 as the web display layer. The 500 m grid is intuitive for urban planning because it approximates a fine neighborhood block scale while remaining computationally manageable. H3 hexagons are useful for the final application because they create equal-index spatial units that aggregate well, render efficiently, and avoid some visual bias of square grids. The notebooks model 15-minute access with mode-specific catchments: walking at about 1.2 km, cycling at about 3.5 km, transit as a local public-transport catchment, and car at 5 km. This is an accessibility proxy rather than a full routing model. The road network is used for cycling and environmental context, and the supplied network-extract notebook documents how a future extension could replace straight-line catchments with Dijkstra network isochrones.
 
@@ -113,8 +113,8 @@ The table below is the conceptual source log. The following cells then validate 
             code(
                 r"""
 source_log = pd.DataFrame([
-    {"family": "Administrative", "dataset": "2024 Shanghai city/district boundaries", "use": "citywide 500 m grid mask, district labels"},
-    {"family": "Built area", "dataset": "2020 built-up area", "use": "source reference for urbanized land coverage"},
+    {"family": "Administrative", "dataset": "2024 Shanghai city/district boundaries", "use": "outer city clip and district labels"},
+    {"family": "Built area", "dataset": "2020 built-up area", "use": "one component of the land and activity mask"},
     {"family": "POI", "dataset": "Gaode WGS84 POI shapefiles", "use": "food, health, education, sport, civic, transit proxy"},
     {"family": "POI", "dataset": "POI 2024 classified CSVs", "use": "preferred Shanghai POI source for Track A sport, food, scenic, transit, and baseline education/health"},
     {"family": "Traffic", "dataset": "bus stops, metro stations, metro exits", "use": "public transport access"},
@@ -428,6 +428,7 @@ from scripts.build_outputs import (
     add_districts,
     add_h3_ids,
     add_housing_price,
+    create_analysis_mask,
     create_500m_grid,
     load_env,
     load_poi_points,
@@ -556,17 +557,19 @@ built = read_file(paths["built_area_2020"], crs=PROJECT_CRS)
 city_union = union_geometry(city)
 built["geometry"] = built.geometry.make_valid().intersection(city_union)
 built = built[~built.geometry.is_empty].copy()
+analysis_mask = create_analysis_mask(paths, city)
 
 pd.Series({
     "city_area_km2": city.geometry.area.sum() / 1_000_000,
     "built_area_km2": built.geometry.area.sum() / 1_000_000,
+    "analysis_mask_km2": analysis_mask.geometry.area.sum() / 1_000_000,
     "built_polygons": len(built),
 }).round(2)
 """
             ),
             code(
                 r"""
-grid = create_500m_grid(city, label="Shanghai administrative boundary")
+grid = create_500m_grid(analysis_mask, label="land and urban-activity mask")
 grid = add_districts(grid, paths["district_boundary"])
 
 grid[["grid_id", "district", "cell_area_m2", "centroid_x", "centroid_y"]].head()
@@ -954,8 +957,8 @@ summary = {
         "max": round(float(h3_gdf["composite_score"].max()), 2),
     },
     "method_notes": [
-        "500 m cells are generated inside the Shanghai administrative boundary so coastal districts, Changxing Island, and Chongming Island remain visible.",
-        "The 2020 built-up area layer is retained as a source reference, but it is not used to remove low-density island or coastal cells from the web map.",
+        "500 m cells are generated from a land and urban-activity mask so coastal districts, Changxing Island, and Chongming Island remain visible while open sea is excluded.",
+        "The mask combines the 2020 built-up area, non-water land-use polygons, Baidu AOI polygons, and a small road-network buffer, clipped to the Shanghai administrative boundary.",
         "15-minute access is modelled with mode-specific distance catchments.",
         "Road data support cycling environment and major-road environmental context.",
     ],
